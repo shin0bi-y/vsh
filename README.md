@@ -42,3 +42,8 @@ allows to explore an archive and modify it directly on the server
 
 ```vsh -browse <ip> <port> <archive_name>```
  
+- **delete** : 
+
+allows to remotly delete an archive
+
+```vsh -delete <ip> <port> <archive_name>```
