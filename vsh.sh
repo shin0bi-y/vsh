@@ -44,13 +44,16 @@ case $1 in
 			echo "Syntax: vsh -create <ip> <port> <archive_name>"
 			exit
 		fi
+		echo -n "Enter your SSH password: "
+		read -s password; echo
 		# First, we verify that the server does not have an archive with the same name
-		archives=$(ssh vsh@$2 -p $3 "ls archives/" 2>/dev/null)
+		archives=$(sshpass -p $password ssh vsh@$2 -p $3 "ls archives/" 2>/dev/null)
 		if [[ $? -ne 0 ]]; then
 			echo Exiting...
 			exit
 		fi
-		if [[ $archives =~ $4 ]]; then
+		pattern="\b$4\b"
+		if [[ $archives =~ $pattern ]]; then
 			echo "This VSH server already has an archive called '$4'"
 			echo "Would you like to overwrite it ? [Y/n]"
 			read rep
@@ -62,7 +65,7 @@ case $1 in
 		arch_path=$(bash /opt/vsh/vsh_create.sh)
         verify_ipaddr $2
         verify_port $3
-        scp -P $3 $arch_path vsh@$2:archives/$4 >> /dev/null
+        sshpass -p $password scp -P $3 $arch_path vsh@$2:archives/$4 >> /dev/null
         if [[ $? -ne 0 ]]; then
             echo Exiting...
             exit
@@ -75,9 +78,11 @@ case $1 in
             echo "Syntax: vsh -list <ip> <port>"
             exit
         fi
+		echo -n "Enter your SSH password: "
+        read -s password; echo
 		verify_ipaddr $2
 		verify_port $3
-		ssh vsh@$2 -p $3 "ls archives/"
+		sshpass -p $password ssh vsh@$2 -p $3 "ls archives/"
 	    ;;
 	"-browse")
 		if [ $# -ne 4 ];then
@@ -87,10 +92,23 @@ case $1 in
         fi
 		verify_ipaddr $2
         verify_port $3
-		ssh vsh@$2 -p $3 "mkdir /home/vsh/browse/$4 && cd /home/vsh/browse/$4; bash /opt/vsh/vsh_extract.sh /home/vsh/archives/$4 >> /dev/null"
-		ssh vsh@$2 -p $3 "cd browse/$4; bash /opt/vsh/vsh_shell.sh $4"
-		arch_path=$(ssh vsh@$2 -p $3 "cd /home/vsh/browse/$4; bash /opt/vsh/vsh_create.sh")
-		ssh vsh@$2 -p $3 "rm -rf /home/vsh/archives/$4; cp $arch_path /home/vsh/archives/$4; rm -rf /home/vsh/browse/$4"
+		echo -n "Enter your SSH password: "
+        read -s password; echo
+        archives=$(sshpass -p $password ssh vsh@$2 -p $3 "ls archives/" 2>/dev/null)
+        if [[ $? -ne 0 ]]; then
+            echo Exiting...
+            exit
+        fi
+		pattern="\b$4\b"
+		if ! [[ $archives =~ $pattern ]]; then
+            echo "This VSH server doesn't have an archive called '$4'"
+            echo "Exiting..."
+            exit
+        fi
+		sshpass -p $password ssh vsh@$2 -p $3 "mkdir /home/vsh/browse/$4 && cd /home/vsh/browse/$4; bash /opt/vsh/vsh_extract.sh /home/vsh/archives/$4 >> /dev/null"
+		sshpass -p $password ssh vsh@$2 -p $3 "cd browse/$4; bash /opt/vsh/vsh_shell.sh $4"
+		arch_path=$(sshpass -p $password ssh vsh@$2 -p $3 "cd /home/vsh/browse/$4; bash /opt/vsh/vsh_create.sh")
+		sshpass -p $password ssh vsh@$2 -p $3 "rm -rf /home/vsh/archives/$4; cp $arch_path /home/vsh/archives/$4; rm -rf /home/vsh/browse/$4"
 		;;
 	"-extract")
 		if [ $# -ne 4 ];then
@@ -100,14 +118,17 @@ case $1 in
         fi
 		verify_ipaddr $2
 		verify_port $3
+		echo -n "Enter your SSH password: "
+        read -s password; echo
         # We verify that the server does have an archive with this name
-        archives=$(ssh vsh@$2 -p $3 "ls archives/$4" 2>/dev/null)
-        if ! [[ $archives =~ $4 ]]; then
+        archives=$(sshpass -p $password ssh vsh@$2 -p $3 "ls archives/$4" 2>/dev/null)
+        pattern="\b$4\b"
+		if ! [[ $archives =~ $pattern ]]; then
             echo "This VSH server does not have an archive called '$4'"
 			exit
 		fi
 		# Downloading the archive
-		scp -P $3 vsh@$2:archives/$4 ./ >> /dev/null
+		sshpass -p $password scp -P $3 vsh@$2:archives/$4 ./ >> /dev/null
 		bash /opt/vsh/vsh_extract.sh $4 >> /dev/null
 		rm -rf $4
 		;;
@@ -123,9 +144,11 @@ case $1 in
         fi
         verify_ipaddr $2
         verify_port $3
+		echo -n "Enter your SSH password: "
+        read -s password; echo
 		# We verify that the server does have an archive with this name
-        archives=$(ssh vsh@$2 -p $3 "ls archives/$4" 2>/dev/null)
-		ssh vsh@$2 -p $3 "rm archives/$4"
+        archives=$(sshpass -p $password ssh vsh@$2 -p $3 "ls archives/$4" 2>/dev/null)
+		sshpass -p $password ssh vsh@$2 -p $3 "rm archives/$4"
 		;;
 	*)
 		echo "Bad syntax !"
