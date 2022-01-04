@@ -1,6 +1,18 @@
 #!/bin/bash
 
-# Todo : replace w/ the argument passed to this script
+# Reset
+Color_Off='\033[0m'       # Text Reset
+
+# Regular Colors
+Black='\033[0;30m'        # Black
+Red='\033[0;31m'          # Red
+Green='\033[0;32m'        # Green
+Yellow='\033[0;33m'       # Yellow
+Blue='\033[0;34m'         # Blue
+Purple='\033[0;35m'       # Purple
+Cyan='\033[0;36m'         # Cyan
+White='\033[0;37m'        # White
+
 # ex : ./vsh_shell.sh <arch_name>
 # in order to jail the user into the archive he asked to browse
 export VSH_ARCHDIR="/home/vsh/browse/$1"
@@ -95,9 +107,13 @@ function shell() {
 
 # where we read the user's input and make the shell function persistant
 while [[ 1 -eq 1 ]]; do
-	rep=$(pwd | sed -e "s#^$VSH_ARCHDIR##")
+	rep=$(pwd | sed -e "s#^$VSH_ARCHDIR##" | sed 's#\/#\\#g')
+	if [[ $rep = "" ]]; then
+		rep="\\"
+	fi
 	echo -n "[ user@vsh $rep ]$> "
-	read command
+	read -r command
+	command=$(echo $command | sed 's#\\#\/#g')
 	output=""
 	shell $command
 
@@ -134,13 +150,13 @@ while [[ 1 -eq 1 ]]; do
                     fi
 					if [[ $command = "ls" ]]; then
 						if [[ ${line:0:1} = "d" ]]; then
-							echo "$name\\"
+							echo -e "${Blue}$name\\ ${Color_Off}"
 						else
 							echo "$name"
 						fi
 					else
 						if [[ ${line:0:1} = "d" ]]; then
-                            echo "$rights $size $name\\"
+                            echo -e "$rights $size ${Blue}$name\\ ${Color_Off}"
                         else
                             echo "$rights $size $name"
                         fi
@@ -158,6 +174,9 @@ while [[ 1 -eq 1 ]]; do
 				fi
 				;;
 			"")
+				if [[ $command =~ "rm" ]]; then
+					command+=" -rf"
+				fi
 				$command 2>/dev/null
 				;;
 		esac

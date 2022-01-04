@@ -106,8 +106,8 @@ case $1 in
             exit
         fi
 		sshpass -p $password ssh vsh@$2 -p $3 "mkdir /home/vsh/browse/$4 && cd /home/vsh/browse/$4; bash /opt/vsh/vsh_extract.sh /home/vsh/archives/$4 >> /dev/null"
-		sshpass -p $password ssh vsh@$2 -p $3 "cd browse/$4; bash /opt/vsh/vsh_shell.sh $4"
-		arch_path=$(sshpass -p $password ssh vsh@$2 -p $3 "cd /home/vsh/browse/$4; bash /opt/vsh/vsh_create.sh")
+		sshpass -p $password ssh vsh@$2 -p $3 "cd browse/$4/*; bash /opt/vsh/vsh_shell.sh $4"
+		arch_path=$(sshpass -p $password ssh vsh@$2 -p $3 "cd /home/vsh/browse/$4/*; bash /opt/vsh/vsh_create.sh")
 		sshpass -p $password ssh vsh@$2 -p $3 "rm -rf /home/vsh/archives/$4; cp $arch_path /home/vsh/archives/$4; rm -rf /home/vsh/browse/$4"
 		;;
 	"-extract")

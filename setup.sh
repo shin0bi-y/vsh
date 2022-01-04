@@ -65,6 +65,8 @@ chmod a+rx /opt/vsh/
 chmod a-rw /usr/bin/vsh
 chmod a+rx /usr/bin/vsh
 
+#ToDo : Install sshpass
+
 echo "---- Done ----"
 echo ; echo ; echo
 echo "Now, you have to :"

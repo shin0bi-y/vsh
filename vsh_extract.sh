@@ -54,9 +54,6 @@ function createrepertory()
 	if [[ ${directory: -1} = "/" ]]; then
 		directory=${directory::-1}
 	fi
-	echo HERE IS FULLPATH "======>" $fullpath
-	echo HERE IS DIRECTORY "======>" $directory
-	echo CREATEACCESSPATH "=======>" $createaccesspath
 	finaldirectory=$(echo $directory | rev | cut -d'/' -f 1 | rev)
 	echo $finaldirectory
 	mkdir "$fullpath/$directory"
