@@ -31,7 +31,7 @@ creates an archive based on the current directory and send it to the server
 
 - **extract** : 
 
-ets an archive from the server and recreates what is stored in it in the current directory
+gets an archive from the server and recreates what is stored in it in the current directory
 
 ```vsh -extract <ip> <port> <archive_name>```
 
