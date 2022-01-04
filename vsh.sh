@@ -1,0 +1,134 @@
+#!/bin/bash
+
+# function that verifies if $1 is a valid ip adress
+verify_ipaddr() {
+	pattern="^([0-9]{1,3}\.){3}[0-9]{1,3}$"
+	if [[ ! $1 =~ $pattern ]] && [ ! $1 = "localhost" ]; then
+		echo "Bad syntax !"
+        echo "Choose a correct IP Adress"
+		exit
+	fi
+}
+
+# function that verifies if $1 is a valid port number
+verify_port() {
+	pattern="[0-9]+"
+    if [[ ! $1 =~ $pattern ]]; then
+        echo "Bad syntax !"
+		echo "Choose a correct port number"
+        exit
+    fi
+}
+
+case $1 in
+	"-help")
+		if [ $# -ne 1 ];then
+		echo "Bad syntax !"
+		echo "Syntax: vsh -help"
+		exit
+		fi
+		echo "---vsh command---"
+		echo "4 options :"
+		echo ""
+		echo "vsh -list <ip> <port> : Returns what archives are stored on the server"
+		echo
+		echo "vsh -create <ip> <port> <archive_name> : Creates an archive from the tree structure in the current directory of the client machine"
+		echo
+		echo "vsh -extract <ip> <port> <archvive_name> : Extracts the content from an archive in the current directory of the client machine"
+		echo
+		echo "vsh -browse <ip> <port> <archive_name> : Allows the user to browse through and modify an archive using basics commands (ls, cd, cat, rm)"
+		;;
+	"-create")
+		if [ $# -ne 4 ];then
+			echo "Bad syntax !"
+			echo "Syntax: vsh -create <ip> <port> <archive_name>"
+			exit
+		fi
+		# First, we verify that the server does not have an archive with the same name
+		archives=$(ssh vsh@$2 -p $3 "ls archives/" 2>/dev/null)
+		if [[ $? -ne 0 ]]; then
+			echo Exiting...
+			exit
+		fi
+		if [[ $archives =~ $4 ]]; then
+			echo "This VSH server already has an archive called '$4'"
+			echo "Would you like to overwrite it ? [Y/n]"
+			read rep
+			if ! [[ $rep = "Y" ]]; then
+				echo "Exiting..."
+				exit
+			fi
+		fi
+		arch_path=$(bash /opt/vsh/vsh_create.sh)
+        verify_ipaddr $2
+        verify_port $3
+        scp -P $3 $arch_path vsh@$2:archives/$4 >> /dev/null
+        if [[ $? -ne 0 ]]; then
+            echo Exiting...
+            exit
+        fi
+		echo "$4 has been successfully uploaded on the server !"
+		;;
+	"-list")
+		if [ $# -ne 3 ]; then
+            echo "Bad syntax !"
+            echo "Syntax: vsh -list <ip> <port>"
+            exit
+        fi
+		verify_ipaddr $2
+		verify_port $3
+		ssh vsh@$2 -p $3 "ls archives/"
+	    ;;
+	"-browse")
+		if [ $# -ne 4 ];then
+            echo "Bad syntax !"
+            echo "Syntax: vsh -browse <ip> <port> <archive_name>"
+            exit
+        fi
+		verify_ipaddr $2
+        verify_port $3
+		ssh vsh@$2 -p $3 "mkdir /home/vsh/browse/$4 && cd /home/vsh/browse/$4; bash /opt/vsh/vsh_extract.sh /home/vsh/archives/$4 >> /dev/null"
+		ssh vsh@$2 -p $3 "cd browse/$4; bash /opt/vsh/vsh_shell.sh $4"
+		arch_path=$(ssh vsh@$2 -p $3 "cd /home/vsh/browse/$4; bash /opt/vsh/vsh_create.sh")
+		ssh vsh@$2 -p $3 "rm -rf /home/vsh/archives/$4; cp $arch_path /home/vsh/archives/$4; rm -rf /home/vsh/browse/$4"
+		;;
+	"-extract")
+		if [ $# -ne 4 ];then
+            echo "Bad syntax !"
+            echo "Syntax: vsh -extract <ip> <port> <archive_name>"
+            exit
+        fi
+		verify_ipaddr $2
+		verify_port $3
+        # We verify that the server does have an archive with this name
+        archives=$(ssh vsh@$2 -p $3 "ls archives/$4" 2>/dev/null)
+        if ! [[ $archives =~ $4 ]]; then
+            echo "This VSH server does not have an archive called '$4'"
+			exit
+		fi
+		# Downloading the archive
+		scp -P $3 vsh@$2:archives/$4 ./ >> /dev/null
+		bash /opt/vsh/vsh_extract.sh $4 >> /dev/null
+		rm -rf $4
+		;;
+	"-delete")
+		if [ $# -ne 4 ];then
+            echo "Bad syntax !"
+            echo "Syntax: vsh -delete <ip> <port> <archive_name>"
+            exit
+        fi
+		if [[ $4 =~ ".." ]]; then
+            echo "'..' isn't allowed in an archive name !"
+			exit
+        fi
+        verify_ipaddr $2
+        verify_port $3
+		# We verify that the server does have an archive with this name
+        archives=$(ssh vsh@$2 -p $3 "ls archives/$4" 2>/dev/null)
+		ssh vsh@$2 -p $3 "rm archives/$4"
+		;;
+	*)
+		echo "Bad syntax !"
+		echo "Usage: vsh <mode> <ip> <port> <archive_name>"
+		;;
+esac
