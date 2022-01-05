@@ -76,9 +76,13 @@ function shell() {
         	        #if [[ $path =~ $pattern ]]; then
             	    #    flag=0
 					#elif [[ ${path::1} = '/' ]]; then
-                    	p=$(readlink -f $path)
-                    	pattern="^($VSH_ARCHDIR).*"
-                    	if ! [[ $p =~ $pattern ]]; then
+                    	echo "here" > /home/vsh/shell.log
+						pwd=$(pwd)
+						echo "$pwd/$path" >> /home/vsh/shell.log
+						p=$(readlink -f "$pwd/$path")
+                    	echo $p >> /home/vsh/shell.log
+						pattern="^($VSH_ARCHDIR).*"
+                    	if ! [[ $p =~ $pattern ]] && ! [[ -z $p ]]; then
                         	flag=0
                     	fi
                 	#fi
