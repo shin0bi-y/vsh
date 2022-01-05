@@ -21,23 +21,6 @@ verify_port() {
 }
 
 case $1 in
-	"-help")
-		if [ $# -ne 1 ];then
-		echo "Bad syntax !"
-		echo "Syntax: vsh -help"
-		exit
-		fi
-		echo "---vsh command---"
-		echo "4 options :"
-		echo ""
-		echo "vsh -list <ip> <port> : Returns what archives are stored on the server"
-		echo
-		echo "vsh -create <ip> <port> <archive_name> : Creates an archive from the tree structure in the current directory of the client machine"
-		echo
-		echo "vsh -extract <ip> <port> <archvive_name> : Extracts the content from an archive in the current directory of the client machine"
-		echo
-		echo "vsh -browse <ip> <port> <archive_name> : Allows the user to browse through and modify an archive using basics commands (ls, cd, cat, rm)"
-		;;
 	"-create")
 		if [ $# -ne 4 ];then
 			echo "Bad syntax !"
@@ -49,7 +32,8 @@ case $1 in
 		# First, we verify that the server does not have an archive with the same name
 		archives=$(sshpass -p $password ssh vsh@$2 -p $3 "ls archives/" 2>/dev/null)
 		if [[ $? -ne 0 ]]; then
-			echo Exiting...
+			echo "Cannot login with ssh"
+			echo "Exiting..."
 			exit
 		fi
 		pattern="\b$4\b"
@@ -151,7 +135,20 @@ case $1 in
 		sshpass -p $password ssh vsh@$2 -p $3 "rm archives/$4"
 		;;
 	*)
-		echo "Bad syntax !"
-		echo "Usage: vsh <mode> <ip> <port> <archive_name>"
+		echo "---vsh command---"
+        echo "4 options :"
+        echo ""
+        echo "vsh -list <ip> <port> : Returns what archives are stored on the server"
+        echo
+        echo "vsh -create <ip> <port> <archive_name> : Creates an archive on the server based on the current directory"
+        echo
+        echo "vsh -extract <ip> <port> <archvive_name> : Extracts the content of a distant archive in the current directory"
+        echo
+        echo "vsh -browse <ip> <port> <archive_name> : Allows the user to browse a distant archive"
+        echo
+        echo "vsh -delete <ip> <port> <archive_name> : Deletes an archive on the server"
+        echo
+        echo "vsh -help : Prints this manual"
+        echo
 		;;
 esac
