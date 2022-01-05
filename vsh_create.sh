@@ -31,7 +31,7 @@ function printrepertory () {
 #Recursive function to analyse the entire tree structure from the current repertory
 function rtree () {
 	printrepertory
-	local list_rep=$(ls -la $directory | egrep '^d[rwx-]{9}' | egrep -o '[0-9A-Za-z]+$')
+	local list_rep=$(ls -la $directory | egrep '^d[rwx-]{9}' | egrep -o '\.*[0-9A-Za-z]+$')
 	if [[ ! -z $list_rep ]];then
 		local tmp_directory=$directory
 		for rep in $list_rep;do

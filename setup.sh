@@ -65,11 +65,23 @@ chmod a+rx /opt/vsh/
 chmod a-rw /usr/bin/vsh
 chmod a+rx /usr/bin/vsh
 
-#ToDo : Install sshpass
+echo; echo; echo
+
+# Installing SSHPass
+exists=$( which sshpass 2>&1 )
+if [[ $exists =~ "no sshpass in" ]]; then
+	distro=$(cat /etc/issue)
+	echo "Installing sshpass"; echo
+	if [[ $distro =~ "Arch" ]]; then
+		pacman -Sy sshpass
+	fi
+	else if [[ $distro =~ "Debian" ]] || [[ $distro =~ "Ubuntu" ]] || [[ $distro =~ "Mint" ]]; then
+		exec "apt update -y && apt install -y sshpass"
+	fi
+fi
 
 echo "---- Done ----"
 echo ; echo ; echo
 echo "Now, you have to :"
-echo " + install a SSH deamon and make it listen on the port you want"
+echo " + make sure that you have a SSH deamon and make it listen on the port you want"
 echo " + enjoy your vsh server :)"
-
