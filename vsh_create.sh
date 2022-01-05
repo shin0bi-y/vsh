@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function printrepertory () {
-	end=$(ls -la $directory | grep "^d" | egrep -o '[0-9A-Za-z]+$')
+	end=$(ls -la $directory | grep "^d" | egrep -o '[0-9A-Za-z_]+$')
 	#Check if it is the end of a branch
 	if [ -z "$end" ];then
 		echo "directory $directory" >> $headertmp
@@ -31,7 +31,7 @@ function printrepertory () {
 #Recursive function to analyse the entire tree structure from the current repertory
 function rtree () {
 	printrepertory
-	local list_rep=$(ls -la $directory | egrep '^d[rwx-]{9}' | egrep -o '\.*[0-9A-Za-z]+$')
+	local list_rep=$(ls -la $directory | egrep '^d[rwx-]{9}' | egrep -o '\.*[0-9A-Za-z_]+$')
 	if [[ ! -z $list_rep ]];then
 		local tmp_directory=$directory
 		for rep in $list_rep;do
