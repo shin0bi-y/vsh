@@ -56,45 +56,45 @@ function shell() {
 		"cat" | "rm" | "touch")
 			flag=1
             for path in ${@:2}; do
-                pattern="\.\."
-                if [[ $path =~ $pattern ]]; then
-                    flag=0
-                elif [[ ${path::1} = '/' ]]; then
+                #pattern="\.\."
+                #if [[ $path =~ $pattern ]]; then
+                #    flag=0
+                #if [[ ${path::1} = '/' ]]; then
                     p=$(readlink -f $path)
                     pattern="^($VSH_ARCHDIR).*"
                     if ! [[ $p =~ $pattern ]]; then
                         flag=0
                     fi
-                fi
+                #fi
             done
 			;;
 		"mkdir")
 			flag=1
 			if [[ $# -gt 2 ]] && [[ $2 = "-p" ]]; then
 	            for path in ${@:3}; do
-    	            pattern="\.\."
-        	        if [[ $path =~ $pattern ]]; then
-            	        flag=0
-					elif [[ ${path::1} = '/' ]]; then
+    	            #pattern="\.\."
+        	        #if [[ $path =~ $pattern ]]; then
+            	    #    flag=0
+					#elif [[ ${path::1} = '/' ]]; then
                     	p=$(readlink -f $path)
                     	pattern="^($VSH_ARCHDIR).*"
                     	if ! [[ $p =~ $pattern ]]; then
                         	flag=0
                     	fi
-                	fi
+                	#fi
             	done
 			elif [[ $# -gt 1 ]]; then
 				for path in ${@:2}; do
-                    pattern="\.\."
-                    if [[ $path =~ $pattern ]]; then
-                        flag=0
-                    elif [[ ${path::1} = '/' ]]; then
+                    #pattern="\.\."
+                    #if [[ $path =~ $pattern ]]; then
+                    #    flag=0
+                    #elif [[ ${path::1} = '/' ]]; then
                         p=$(readlink -f $path)
                         pattern="^($VSH_ARCHDIR).*"
                         if ! [[ $p =~ $pattern ]]; then
                             flag=0
                         fi
-                    fi
+                    #fi
 				done
 			fi
 			;;
