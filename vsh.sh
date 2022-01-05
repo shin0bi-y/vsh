@@ -136,8 +136,8 @@ case $1 in
 		;;
 	*)
 		echo "---vsh command---"
-        echo "4 options :"
-        echo ""
+        echo "Options :"
+        echo
         echo "vsh -list <ip> <port> : Returns what archives are stored on the server"
         echo
         echo "vsh -create <ip> <port> <archive_name> : Creates an archive on the server based on the current directory"
