@@ -60,10 +60,13 @@ function createrepertory()
 	if [ "$createaccesspath/" != "$fullpath/$directory" ];then
 		giverights=$(egrep "^$finaldirectory\sd[rwx-]{9}\s[0-9]+" $headertmp)
 	# 	TODO : FIX CHMOD ON DIRECTORIES !
-	#	rights
-	#	chmod ${octal[0]}${octal[1]}${octal[2]} "$fullpath/$directory"
+		if [[ $flag_chmod_rep -ne 0 ]]; then
+			rights
+    	    chmod ${octal[0]}${octal[1]}${octal[2]} "$fullpath/$directory"
+		else
+			flag_chmod_rep=1
+		fi
 	fi
-
 }
 
 arch_path=$(readlink -e $1)
@@ -79,6 +82,7 @@ tail -n +$startb $arch_path >> $bodytmp
 sed -i 's/\\/\//g' $headertmp
 flag=0
 
+flag_chmod_rep=0
 while read line; do
 	if [ "$(echo $line | egrep "^directory [^ ]+$")" ];then
 		if [ $flag -eq 0 ];then
